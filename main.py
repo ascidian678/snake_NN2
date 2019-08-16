@@ -10,15 +10,15 @@ import logging
 
 import logging
 
-logname = "log"
-
-logging.basicConfig(filename=logname,
-                            filemode='a',
-                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                            datefmt='%H:%M:%S',
-                            level=logging.DEBUG)
-
-logging.info("------start-----")
+# logname = "log"
+# 
+# logging.basicConfig(filename=logname,
+#                             filemode='a',
+#                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+#                             datefmt='%H:%M:%S',
+#                             level=logging.DEBUG)
+# 
+# logging.info("------start-----")
 
 def create_apple(snake, box):
     apple = None
@@ -128,51 +128,42 @@ def generate_dir(stdscr, angle):
 #     else:
 #         return 0
 
-def checkBlocked(snake_, snake_dir, new_direction, left_direction_vector, right_direction_vector, box):
+def checkBlocked(snake, snake_dir, new_direction, left_direction_vector, right_direction_vector, box):
     front_blocked = 0
     left_blocked = 0
     right_blocked = 0
-
-    next_pos = snake_[0] + new_direction
-
-    next_pos = snake_[0] + new_direction
+    snake_ = snake.copy()
     
+
+    next_pos = snake_[0] + snake_dir
+#     next_pos = snake_[0]
     next_pos = next_pos.tolist()
-    
-#     logging.info(type(next_pos))
-#     logging.info(type(snake_))
-#     logging.info(type(new_direction))
-#     
-#     logging.info(next_pos in snake_)
-    
     
     if next_pos[0] in [box[0][0], box[1][0]] or next_pos[1] in [box[0][1], box[1][1]] or next_pos in snake_:
         front_blocked = 1
-    else:
-        front_blocked = 0
 
     next_pos = snake_[0] + left_direction_vector
     next_pos = next_pos.tolist()
     if next_pos[0] in [box[0][0], box[1][0]] or next_pos[1] in [box[0][1], box[1][1]] or next_pos in snake_:
         left_blocked = 1
-    else:
-        left_blocked = 0
 
     next_pos = snake_[0] + right_direction_vector
     next_pos = next_pos.tolist()
     if next_pos[0] in [box[0][0], box[1][0]] or next_pos[1] in [box[0][1], box[1][1]] or next_pos in snake_:
         right_blocked = 1
-    else:
-        right_blocked = 0
 
-    # front_blocked = is_direction_blocked(next_pos, snake_dir, snake_, box)
-    # left_blocked = is_direction_blocked(next_pos, left_direction_vector, snake_, box)
-    # right_blocked = is_direction_blocked(next_pos, right_direction_vector, snake_, box)
 
     return  left_blocked, front_blocked, right_blocked
 
 
 def main(stdscr):
+    logger = logging.getLogger(__file__)
+    hdlr = logging.FileHandler(__file__ + ".log")
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr)
+    logger.setLevel(logging.DEBUG)
+    
     curses.curs_set(0)  # stop cursor from blink
     stdscr.nodelay(1)  # getch method will not block the code anymore
     stdscr.timeout(150)  # waits 150 ms till next loop
@@ -191,7 +182,7 @@ def main(stdscr):
         textpad.rectangle(stdscr, box[0][0], box[0][1], box[1][0], box[1][1])
 
         snake = [[h // 2, w // 2 + 1], [h // 2, w // 2], [h // 2, w // 2 - 1]]
-
+        logger.info("yeah")
         for y, x in snake:
             stdscr.addstr(y, x, "#")
 
@@ -205,7 +196,7 @@ def main(stdscr):
         print_score(stdscr, score)
 
         while 1:
-
+            
             head = snake[0]
 
             angle, snake_dir, apple_dir = calc_angle(apple, snake)
@@ -220,14 +211,18 @@ def main(stdscr):
             if direction == [0, 0, 1]:
                 new_direction = right_direction_vector
             
-            new_head = generate_movement(new_direction, head)
+            
             # print(new_direction, left_direction_vector, right_direction_vector)
-            logging.info(new_direction, left_direction_vector, right_direction_vector)
+#             logging.info(new_direction, left_direction_vector, right_direction_vector)
 
 
             left_blocked, front_blocked, right_blocked  = checkBlocked(snake, snake_dir, new_direction, left_direction_vector,
                                         right_direction_vector, box)
-
+            new_head = generate_movement(new_direction, head)
+            logger.info("left, front, right")
+            logger.info(str(left_blocked))
+            logger.info(str(front_blocked))
+            logger.info(str(right_blocked))
 #             print("block vect: ", left_blocked, front_blocked, right_blocked)
 
             if left_blocked and right_blocked and front_blocked:
