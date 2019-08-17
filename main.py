@@ -5,20 +5,27 @@ import time
 from curses import wrapper
 import math
 import numpy as np
+import sys
+
 import logging
 
+# logname = "log"
 
-import logging
+# logging.basicConfig(filename=logname,
+#                             filemode='a',
+#                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+#                             datefmt='%H:%M:%S',
+#                             level=logging.DEBUG)
 
-logname = "log"
+#logging.info("------start-----")
 
-logging.basicConfig(filename=logname,
-                            filemode='a',
-                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                            datefmt='%H:%M:%S',
-                            level=logging.DEBUG)
-
-logging.info("------start-----")
+class StdOutWrapper:
+    text = ""
+    def write(self,txt):
+        self.text += txt
+        self.text = '\n'.join(self.text.split('\n')[-30:])
+    def get_text(self,beg,end):
+        return '\n'.join(self.text.split('\n')[beg:end])
 
 def create_apple(snake, box):
     apple = None
@@ -173,6 +180,7 @@ def checkBlocked(snake_, snake_dir, new_direction, left_direction_vector, right_
 
 
 def main(stdscr):
+
     curses.curs_set(0)  # stop cursor from blink
     stdscr.nodelay(1)  # getch method will not block the code anymore
     stdscr.timeout(150)  # waits 150 ms till next loop
@@ -183,6 +191,7 @@ def main(stdscr):
 
     input_vect = []
     output_vect = []
+
 
     while run < runNumber:
 
@@ -221,8 +230,8 @@ def main(stdscr):
                 new_direction = right_direction_vector
             
             new_head = generate_movement(new_direction, head)
-            # print(new_direction, left_direction_vector, right_direction_vector)
-            logging.info(new_direction, left_direction_vector, right_direction_vector)
+            print(new_direction, left_direction_vector, right_direction_vector)
+            #logging.info(new_direction, left_direction_vector, right_direction_vector)
 
 
             left_blocked, front_blocked, right_blocked  = checkBlocked(snake, snake_dir, new_direction, left_direction_vector,
@@ -274,5 +283,9 @@ def main(stdscr):
         run += 1
     stdscr.getch()
 
+if __name__ == "__main__": 
+    wrapper(main)
 
-wrapper(main)
+
+# stdscr = curses.initscr()
+# main(stdscr)
