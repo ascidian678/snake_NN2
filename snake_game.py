@@ -7,6 +7,7 @@ import math
 import numpy as np
 import logging
 
+
 def create_apple(snake, box):
     apple = None
 
@@ -71,7 +72,7 @@ def calc_angle(apple_, snake_):
 def generate_movement(direction, head_):
     new_head_ = head_
     direction = direction.tolist()
-#     print("direction: ", direction)
+    #     print("direction: ", direction)
     if direction == [0, 1]:
         # RIGHT
         new_head_ = [head_[0], head_[1] + 1]
@@ -108,17 +109,16 @@ def generate_dir(stdscr, angle):
     return direction_
 
 
-def checkBlocked(snake, snake_dir, new_direction, left_direction_vector, right_direction_vector, box):
+def checkBlocked(snake, snake_dir, left_direction_vector, right_direction_vector, box):
     front_blocked = 0
     left_blocked = 0
     right_blocked = 0
     snake_ = snake.copy()
-    
 
     next_pos = snake_[0] + snake_dir
-#     next_pos = snake_[0]
+    #     next_pos = snake_[0]
     next_pos = next_pos.tolist()
-    
+
     if next_pos[0] in [box[0][0], box[1][0]] or next_pos[1] in [box[0][1], box[1][1]] or next_pos in snake_:
         front_blocked = 1
 
@@ -132,17 +132,44 @@ def checkBlocked(snake, snake_dir, new_direction, left_direction_vector, right_d
     if next_pos[0] in [box[0][0], box[1][0]] or next_pos[1] in [box[0][1], box[1][1]] or next_pos in snake_:
         right_blocked = 1
 
-    return  left_blocked, front_blocked, right_blocked
+    return left_blocked, front_blocked, right_blocked
 
 
-def main(stdscr):
+def dir_correction(direction, directionVect, left_blocked, front_blocked, right_blocked):
+    left_direction_vector = np.array([-directionVect[1], directionVect[0]])
+    right_direction_vector = np.array([directionVect[1], -directionVect[0]])
+    print("blocking:")
+    print( left_blocked, front_blocked, right_blocked)
+    if front_blocked:
+        if left_blocked:
+            direction = [0, 0, 1]
+        elif right_blocked:
+            direction = [1, 0, 0]
+
+    elif left_blocked:
+        if front_blocked:
+            direction = [0, 0, 1]
+        elif right_blocked:
+            direction = [0, 1, 0]
+
+    print("correct_dir:")
+    print(direction)
+    # elif right_blocked:
+    #     if front_blocked:
+    #         direction = [1, 0, 0]
+    #     if left_blocked:
+    #         direction = [0, 1, 0]
+    return direction
+
+
+def game(stdscr, speed):
     logger = logging.getLogger(__file__)
     hdlr = logging.FileHandler(__file__ + ".log")
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
     hdlr.setFormatter(formatter)
     logger.addHandler(hdlr)
     logger.setLevel(logging.DEBUG)
-    
+
     curses.curs_set(0)  # stop cursor from blink
     stdscr.nodelay(1)  # getch method will not block the code anymore
     stdscr.timeout(150)  # waits 150 ms till next loop
@@ -176,7 +203,7 @@ def main(stdscr):
         print_score(stdscr, score)
 
         while 1:
-            
+
             head = snake[0]
 
             angle, snake_dir, apple_dir = calc_angle(apple, snake)
@@ -185,33 +212,28 @@ def main(stdscr):
             left_direction_vector = np.array([-snake_dir[1], snake_dir[0]])
             right_direction_vector = np.array([snake_dir[1], -snake_dir[0]])
 
+            left_blocked, front_blocked, right_blocked = checkBlocked(snake, snake_dir,
+                                                                      left_direction_vector,
+                                                                      right_direction_vector, box)
             new_direction = snake_dir.copy()
             if direction == [1, 0, 0]:
                 new_direction = left_direction_vector
             if direction == [0, 0, 1]:
                 new_direction = right_direction_vector
 
-
             new_head = generate_movement(new_direction, head)
-            left_blocked, front_blocked, right_blocked  = checkBlocked(snake, snake_dir, new_direction, left_direction_vector,
-                                        right_direction_vector, box)
 
             logger.info("left, front, right")
             logger.info(str(left_blocked))
             logger.info(str(front_blocked))
             logger.info(str(right_blocked))
 
-            if left_blocked and right_blocked and front_blocked:
-                break
-
-            input_vect.append([front_blocked, left_blocked, right_blocked, apple_dir[0], apple_dir[1],
-                              snake_dir[0], snake_dir[1]])
-
-            output_vect.append(direction)
+            # if left_blocked and right_blocked and front_blocked:
+            #     break
 
             print_angle(stdscr, angle)
 
-            angle, snake_dir, apple_dir = calc_angle(apple, snake)
+            # angle, snake_dir, apple_dir = calc_angle(apple, snake)
 
             snake.insert(0, new_head)
             stdscr.addstr(new_head[0], new_head[1], "#")
@@ -234,15 +256,36 @@ def main(stdscr):
 
                 stdscr.nodelay(0)
                 stdscr.getch()
-                time.sleep(3)
+                time.sleep(speed)
                 stdscr.clear()
                 stdscr.refresh()
                 curses.endwin()
+
+                direction = dir_correction(direction, new_direction, left_blocked, front_blocked, right_blocked)
+                input_vect.append([front_blocked, left_blocked, right_blocked, apple_dir[0], apple_dir[1],
+                                   snake_dir[0], snake_dir[1]])
+                output_vect.append(direction)
+
                 break
-            time.sleep(0.01)
+            else:
+                input_vect.append([front_blocked, left_blocked, right_blocked, apple_dir[0], apple_dir[1],
+                                   snake_dir[0], snake_dir[1]])
+                output_vect.append(direction)
+
+            time.sleep(speed)
             stdscr.refresh()
         run += 1
-    stdscr.getch()
 
+    return input_vect, output_vect
 
-wrapper(main)
+games = 10
+DATA_X = []
+DATA_Y = []
+for i in range(games):
+    data_x, data_y = wrapper(game, 1e-4)
+    DATA_X.append((data_x))
+    DATA_Y.append((data_y))
+# print(data_y)
+
+print(len(DATA_X))
+print(len(DATA_Y))
