@@ -10,15 +10,6 @@ import logging
 
 import logging
 
-# logname = "log"
-# 
-# logging.basicConfig(filename=logname,
-#                             filemode='a',
-#                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-#                             datefmt='%H:%M:%S',
-#                             level=logging.DEBUG)
-# 
-# logging.info("------start-----")
 
 def create_apple(snake, box):
     apple = None
@@ -120,13 +111,6 @@ def generate_dir(stdscr, angle):
 
     return direction_
 
-# def is_direction_blocked(snake_position, current_direction_vector, snake_, box):
-#     next_step = snake_position[0] + current_direction_vector
-#     snake_start = snake_position[0]
-#     if  (snake_position[0] in [box[0][0], box[1][0]] or snake_position[1] in [box[0][1], box[1][1]]) == 1 or snake_position in snake_ :
-#         return 1
-#     else:
-#         return 0
 
 def checkBlocked(snake, snake_dir, new_direction, left_direction_vector, right_direction_vector, box):
     front_blocked = 0
@@ -136,7 +120,6 @@ def checkBlocked(snake, snake_dir, new_direction, left_direction_vector, right_d
     
 
     next_pos = snake_[0] + snake_dir
-#     next_pos = snake_[0]
     next_pos = next_pos.tolist()
     
     if next_pos[0] in [box[0][0], box[1][0]] or next_pos[1] in [box[0][1], box[1][1]] or next_pos in snake_:
@@ -210,20 +193,17 @@ def main(stdscr):
                 new_direction = left_direction_vector
             if direction == [0, 0, 1]:
                 new_direction = right_direction_vector
-            
-            
-            # print(new_direction, left_direction_vector, right_direction_vector)
-#             logging.info(new_direction, left_direction_vector, right_direction_vector)
 
 
             left_blocked, front_blocked, right_blocked  = checkBlocked(snake, snake_dir, new_direction, left_direction_vector,
                                         right_direction_vector, box)
+            
             new_head = generate_movement(new_direction, head)
+            
             logger.info("left, front, right")
             logger.info(str(left_blocked))
             logger.info(str(front_blocked))
             logger.info(str(right_blocked))
-#             print("block vect: ", left_blocked, front_blocked, right_blocked)
 
             if left_blocked and right_blocked and front_blocked:
                 break
