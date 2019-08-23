@@ -2,10 +2,9 @@ import curses
 from curses import textpad
 import random
 import time
-from curses import wrapper
 import math
 import numpy as np
-import logging
+# import logging
 
 class Snake(object):
     
@@ -22,7 +21,11 @@ class Snake(object):
         snake_ = [[h // 2, w // 2 + 1], [h // 2, w // 2], [h // 2, w // 2 - 1]]
         return snake_
     
-    def play(self):
+    def play(self, testNN = False, _model = None):
+        """
+        if testNN = True, you gonna bypass the decision making algorithm and feed the snake with predictions
+        """
+        
         box = self.box
         apple = None
         snake = self.snake_init(self.h, self.w)
@@ -48,7 +51,9 @@ class Snake(object):
             head = snake[0]
     
             angle, snake_dir, apple_dir = self.calc_angle(apple, snake)
-            direction = self.generate_dir(stdscr, angle)
+            
+            
+            direction = self.generate_dir(angle)
     
             left_direction_vector = np.array([-snake_dir[1], snake_dir[0]])
             right_direction_vector = np.array([snake_dir[1], -snake_dir[0]])
@@ -56,24 +61,47 @@ class Snake(object):
             left_blocked, front_blocked, right_blocked = self.checkBlocked(snake, snake_dir,
                                                                       left_direction_vector,
                                                                       right_direction_vector, box)
+            
             new_direction = snake_dir.copy()
-            if direction == [1, 0, 0]:
-                new_direction = left_direction_vector
-            if direction == [0, 0, 1]:
-                new_direction = right_direction_vector
-    
+# --------------------------------------------------------------------------------------------
+            if testNN == False:
+                
+                if direction == [1, 0, 0]:
+                    new_direction = left_direction_vector
+                if direction == [0, 0, 1]:
+                    new_direction = right_direction_vector
+            
+            else:    
+                
+                input_test_vector = [front_blocked, left_blocked, right_blocked, apple_dir[0], apple_dir[1],
+                                   snake_dir[0], snake_dir[1]]
+                
+                input_test_vector = np.array(input_test_vector).reshape(-1, len(input_test_vector)) #creating a vector from a list
+                
+                predicted_direction = self.NN( _model, input_test_vector)
+                print(predicted_direction)
+                predicted_direction = np.argmax(np.array(predicted_direction))
+#                 predictions = model.eval(feed_dict = {x:testX})
+                
+                if predicted_direction == [1, 0, 0]:
+                    new_direction = left_direction_vector
+                if predicted_direction == [0, 0, 1]:
+                    new_direction = right_direction_vector
+                
+ # --------------------------------------------------------------------------------------------               
             new_head = self.generate_movement(new_direction, head)
+                
             snake.insert(0, new_head)
 
             if snake[0] == apple:
                 score += 1
-                self.print_score(stdscr, score)
                 apple = None
                 apple = self.create_apple(apple, snake, box)
 
             else:
                 snake.pop()
-                
+                               
+# --------------------------------------------------------------------------------------------
             if (snake[0][0] in [box[0][0], box[1][0]] or
                     snake[0][1] in [box[0][1], box[1][1]] or
                     snake[0] in snake[1:]):
@@ -93,6 +121,7 @@ class Snake(object):
                                    snake_dir[0], snake_dir[1]])
                 output_vect.append(direction)
             
+        return input_vect, output_vect
             
         
     def print_score(self, stdscr, score):
@@ -169,7 +198,7 @@ class Snake(object):
         return new_head_
 
 
-    def generate_dir(self, stdscr, angle):
+    def generate_dir(self, angle):
         if angle > 0:
             # right
             direction_ = [0, 0, 1]
@@ -214,8 +243,8 @@ class Snake(object):
     def dir_correction(self, direction, directionVect, left_blocked, front_blocked, right_blocked):
         left_direction_vector = np.array([-directionVect[1], directionVect[0]])
         right_direction_vector = np.array([directionVect[1], -directionVect[0]])
-        print("blocking:")
-        print( left_blocked, front_blocked, right_blocked)
+#         print("blocking:")
+#         print( left_blocked, front_blocked, right_blocked)
         if front_blocked:
             if left_blocked:
                 direction = [0, 0, 1]
@@ -228,12 +257,10 @@ class Snake(object):
             elif right_blocked:
                 direction = [0, 1, 0]
     
-        print("correct_dir:")
-        print(direction)
+#         print("correct_dir:")
+#         print(direction)
     
         return direction
-    
-    
     
     def init_render(self):
         stdscr = curses.initscr()
@@ -259,6 +286,9 @@ class Snake(object):
         stdscr.nodelay(0) 
         curses.endwin()
         
+    def NN(self, model, input_vect):
+        predictions = model.predict(input_vect)
+        return output_vect
+    
+    
         
-s = Snake(True)
-s.play()
