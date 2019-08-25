@@ -257,14 +257,14 @@ def game(stdscr, speed):
                 curses.endwin()
 
                 direction = dir_correction(direction, new_direction, left_blocked, front_blocked, right_blocked)
-                input_vect.append([front_blocked, left_blocked, right_blocked, apple_dir[0], apple_dir[1],
-                                   snake_dir[0], snake_dir[1]])
+                input_vect.append([left_blocked, front_blocked, right_blocked, apple_dir[1], apple_dir[0],
+                                   snake_dir[1], snake_dir[0]])
                 output_vect.append(direction)
 
                 break
             else:
-                input_vect.append([front_blocked, left_blocked, right_blocked, apple_dir[0], apple_dir[1],
-                                   snake_dir[0], snake_dir[1]])
+                input_vect.append([left_blocked, front_blocked, right_blocked, apple_dir[1], apple_dir[0],
+                                   snake_dir[1], snake_dir[0]])
                 output_vect.append(direction)
 
             time.sleep(speed)
