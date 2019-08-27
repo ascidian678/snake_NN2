@@ -7,8 +7,6 @@ import numpy as np
 import logging
 
 
-# import logging
-
 class Snake(object):
 
     def __init__(self, gui=False):
@@ -43,7 +41,10 @@ class Snake(object):
         output_vect = []
         direction = [0, 1, 0]
         score = 0
-
+        prev_score = 0
+        dist = self.getAppleDistance(apple, snake)
+        prev_dist = dist
+        
         while 1:
             if self.gui:
                 stdscr = self.init_render()
@@ -59,26 +60,30 @@ class Snake(object):
             right_direction_vector = np.array([snake_dir[1], snake_dir[0]*(-1)])
             left_blocked, front_blocked, right_blocked = self.checkBlocked(snake, snake_dir, left_direction_vector, right_direction_vector, box)
             new_direction = snake_dir.copy()
+#             print(angle)
             # --------------------------------------------------------------------------------------------
             if testNN == False:
              
-                direction = self.dir_correction(direction, new_direction, left_blocked, front_blocked, right_blocked)            
+                direction = self.dir_correction(direction, new_direction, left_blocked, front_blocked, right_blocked)  
+                dirScalar = 0          
                 if direction == [1, 0, 0]:
                     new_direction = left_direction_vector
-                if direction == [0, 0, 1]:
+                    dirScalar = -1
+                elif direction == [0, 0, 1]:
                     new_direction = right_direction_vector
+                    dirScalar = 1
              
-                
-                
                 if left_blocked and front_blocked and right_blocked:
                  break
-             
-                input_test_vector = [left_blocked, front_blocked, right_blocked, apple_dir[0], new_direction[0], apple_dir[1], new_direction[1]]
+                
+                input_test_vector = [left_blocked, front_blocked, right_blocked, angle, dirScalar]
                 input_vect.append(input_test_vector)
-                output_vect.append(direction)
-
-
-
+                
+                if score > prev_score or dist < prev_dist:
+                    output = 1
+                else:
+                    output = 0
+                    
 
             else:
 
@@ -87,17 +92,20 @@ class Snake(object):
                 if direction == [0, 0, 1]:
                     new_direction = right_direction_vector
                 
-                input_test_vector = [left_blocked, front_blocked, right_blocked, apple_dir[0], new_direction[0], apple_dir[1], new_direction[1]]
+                predicted_directions = []
+                for dirScalar in range(-1, 2):
+                    input_test_vector = [left_blocked, front_blocked, right_blocked, angle, dirScalar]
 
 #                 input_test_vector = np.array(input_test_vector).reshape(-1, 7)  # creating a vector from a list KERAS
-                input_test_vector = np.array(input_test_vector).reshape(-1, 7, 1)  # creating a vector from a list tflearn
-                predicted_direction = self.NN(_model, input_test_vector)
+                    input_test_vector = np.array(input_test_vector).reshape(-1, 5, 1)  # creating a vector from a list tflearn
+                    predicted_direction = self.NN(_model, input_test_vector)
+                    predicted_directions.append(predicted_direction)
                 
-                predicted_direction_index = np.argmax(np.array(predicted_direction))
+                predicted_direction_index = np.argmax(np.array(predicted_directions))-1
 
-                if predicted_direction_index == 0:
+                if predicted_direction_index == -1:
                     new_direction = left_direction_vector
-                if predicted_direction_index == 2:
+                if predicted_direction_index == 1:
                     new_direction = right_direction_vector
 
             # --------------------------------------------------------------------------------------------
@@ -118,12 +126,18 @@ class Snake(object):
                     snake[0][1] in [box[0][1], box[1][1]] or
                     snake[0] in snake[1:]):
                 # msg = "Game over!"
+                output = -1
+                output_vect.append(output)
                 if self.gui:
                     self.quit_render(stdscr)
                 break
 
 
-
+            prev_score = score
+            prev_dist = dist
+            if testNN == False:
+                output_vect.append(output)
+            
         return input_vect, output_vect
 
     def print_score(self, stdscr, score):
@@ -149,6 +163,11 @@ class Snake(object):
 
         return apple
 
+    def getAppleDistance(self, apple_, snake_):
+        apple_vect_ = np.array(apple_) - np.array(snake_[0])
+        distance = np.linalg.norm(apple_vect_)
+        return distance
+
     def calc_angle(self, apple_, snake_):
         snake_vect_ = np.array(snake_[0]) - np.array(snake_[1])
         snake_vect_[0], snake_vect_[1] = snake_vect_[1], snake_vect_[0]
@@ -158,12 +177,6 @@ class Snake(object):
 
         snake_vect_norm_ = np.linalg.norm(snake_vect_)
         apple_vect_norm_ = np.linalg.norm(apple_vect_)
-        
-        if snake_vect_norm_ == 0:
-            snake_vect_norm_ = 10
-            
-        if apple_vect_norm_ == 0:
-            apple_vect_norm_ = 10
 
         snake_vect_ = snake_vect_ / snake_vect_norm_
         apple_vect_ = apple_vect_ / apple_vect_norm_

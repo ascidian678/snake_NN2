@@ -15,9 +15,6 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import model_from_json
 
 
-# from statistics import mean
-# from collections import Counter
-
 
 def getTrainingData(_gameNumbers, gui_ = False):
     _input_data = []
@@ -29,10 +26,6 @@ def getTrainingData(_gameNumbers, gui_ = False):
         s = Snake(gui=gui_)
 
         input_vect, output_vect = s.play()
-
-#         if i in checklist:
-#             print('training progress: ', i)
-
         _input_data.append(input_vect)
         _output_data.append(output_vect)
 
@@ -52,7 +45,7 @@ def testNetworkTF(filename, model=None):
     else:
         _model = create_modelTF()
 #         _model.load("D:/Python3/snake_NN/snake_nn.tfl", weights_only=True)
-        _model.load("/home/cada/python3/snake_NN/snake_nn.tfl", weights_only=True)
+        _model.load("/home/cada/python3/snake_NN2/snake_nn.tfl", weights_only=True)
 
     input_vect, output_vect = s2.play(testNN=True, _model=_model)
 
@@ -83,14 +76,9 @@ def testNetworkKERAS(model=None):
 
 
 def trainNetworkTF(x, y, model, filename):
-    # x = np.array(x).reshape(-1, 7)
-    # y = np.array(y).reshape(-1, 3)
-    # print(50 * "*")
-    # print(x[0])
-    # print(50 * "*")
-    # print(y[0])
-    X = np.array([i[0] for i in x]).reshape(-1, 7, 1)
-    Y = np.array([i[0] for i in y]).reshape(-1, 3)
+    
+    X = np.array([i[0] for i in x]).reshape(-1, 5, 1)
+    Y = np.array([i[0] for i in y]).reshape(-1, 1)
     model.fit(X, Y, n_epoch=3, shuffle=True, run_id=filename)
     print("--- saving trained model ---")
     model.save(filename)
@@ -107,10 +95,9 @@ def trainNetworkKERAS(x, y, model):
 
 
 def create_modelTF():
-    network = input_data(shape=[None, 7, 1], name='input')
-#     network = fully_connected(network, 9, activation='relu')
+    network = input_data(shape=[None, 5, 1], name='input')
     network = fully_connected(network, 25, activation='relu')
-    network = fully_connected(network, 3, activation='softmax')
+    network = fully_connected(network, 1, activation='linear')
     network = regression(network, optimizer='adam', learning_rate=1e-2, loss='mean_square', name='target')
 #     model = DNN(network, checkpoint_path='snake_nn.tfl', tensorboard_dir='log', max_checkpoints=1 )
     model = DNN(network, tensorboard_dir='log')
@@ -128,8 +115,9 @@ def create_modelKERAS():
 
 
 def main():
-#     inputData, outputData = getTrainingData(30000, gui_=False)
-# #     print(len(inputData[0]))
+#     inputData, outputData = getTrainingData(1000, gui_=False)
+#     print(len(inputData))
+#     print(len(outputData))
 #     modelTF = create_modelTF()
 #     modelKER = create_modelKERAS()
     NN_fileName = "snake_nn.tfl"
