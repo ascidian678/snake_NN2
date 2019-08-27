@@ -7,8 +7,6 @@ import math
 import numpy as np
 import sys
 
-import logging
-
 def create_apple(snake, box):
     apple = None
 
@@ -29,7 +27,7 @@ def print_score(stdscr, score):
 
 
 def print_angle(stdscr, angle_):
-    # angle_ = np.rad2deg(angle_)
+    angle_ = np.rad2deg(angle_)
     h, w = stdscr.getmaxyx()
     text = "angle {}".format(angle_)
     stdscr.addstr(1, w // 2, text)
@@ -39,7 +37,7 @@ def print_angle(stdscr, angle_):
 def print_dir(stdscr, dirList):
     h, w = stdscr.getmaxyx()
     dir = "dir: {0}".format(dirList)
-    stdscr.addstr(1, 1, dir)
+    stdscr.addstr(1, 5, dir)
     stdscr.refresh()
 
 
@@ -109,13 +107,6 @@ def generate_dir(stdscr, angle):
 
     return direction_
 
-# def is_direction_blocked(snake_position, current_direction_vector, snake_, box):
-#     next_step = snake_position[0] + current_direction_vector
-#     snake_start = snake_position[0]
-#     if  (snake_position[0] in [box[0][0], box[1][0]] or snake_position[1] in [box[0][1], box[1][1]]) == 1 or snake_position in snake_ :
-#         return 1
-#     else:
-#         return 0
 
 def checkBlocked(snake, snake_dir, new_direction, left_direction_vector, right_direction_vector, box):
     front_blocked = 0
@@ -125,7 +116,6 @@ def checkBlocked(snake, snake_dir, new_direction, left_direction_vector, right_d
     
 
     next_pos = snake_[0] + snake_dir
-#     next_pos = snake_[0]
     next_pos = next_pos.tolist()
     
     if next_pos[0] in [box[0][0], box[1][0]] or next_pos[1] in [box[0][1], box[1][1]] or next_pos in snake_:
@@ -141,7 +131,6 @@ def checkBlocked(snake, snake_dir, new_direction, left_direction_vector, right_d
     if next_pos[0] in [box[0][0], box[1][0]] or next_pos[1] in [box[0][1], box[1][1]] or next_pos in snake_:
         right_blocked = 1
 
-
     return  left_blocked, front_blocked, right_blocked
 
 
@@ -156,7 +145,7 @@ def main(stdscr):
     curses.curs_set(0)  # stop cursor from blink
     stdscr.nodelay(1)  # getch method will not block the code anymore
     stdscr.timeout(150)  # waits 150 ms till next loop
-    h, w = stdscr.getmaxyx() 
+    h, w = stdscr.getmaxyx()
 
     run = 0
     runNumber = 1
@@ -168,6 +157,7 @@ def main(stdscr):
     while run < runNumber:
 
         h, w = stdscr.getmaxyx()  # get window size
+
         box = [[3, 3], [h - 3, w - 3]]  # define game space with textpad
         textpad.rectangle(stdscr, box[0][0], box[0][1], box[1][0], box[1][1])
 
@@ -195,25 +185,22 @@ def main(stdscr):
             left_direction_vector = np.array([-snake_dir[1], snake_dir[0]])
             right_direction_vector = np.array([snake_dir[1], -snake_dir[0]])
 
-            new_direction = snake_dir
+            new_direction = snake_dir.copy()
             if direction == [1, 0, 0]:
                 new_direction = left_direction_vector
             if direction == [0, 0, 1]:
                 new_direction = right_direction_vector
-            
-            
-            print(new_direction, left_direction_vector, right_direction_vector)
-#             logging.info(new_direction, left_direction_vector, right_direction_vector)
 
 
+            new_head = generate_movement(new_direction, head)
             left_blocked, front_blocked, right_blocked  = checkBlocked(snake, snake_dir, new_direction, left_direction_vector,
                                         right_direction_vector, box)
-            new_head = generate_movement(new_direction, head)
+
+            
             logger.info("left, front, right")
             logger.info(str(left_blocked))
             logger.info(str(front_blocked))
             logger.info(str(right_blocked))
-#             print("block vect: ", left_blocked, front_blocked, right_blocked)
 
             if left_blocked and right_blocked and front_blocked:
                 break
@@ -246,14 +233,13 @@ def main(stdscr):
                     snake[0] in snake[1:]):
                 # msg = "Game over!"
 
-                # stdscr.addstr(h // 2, w // 2 - len(msg), msg)
                 stdscr.nodelay(0)
                 stdscr.getch()
                 time.sleep(3)
                 stdscr.clear()
                 stdscr.refresh()
                 curses.endwin()
-#                 break
+                break
             time.sleep(0.01)
             stdscr.refresh()
         run += 1
