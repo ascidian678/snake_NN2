@@ -115,16 +115,16 @@ def create_modelKERAS():
 
 
 def main():
-#     inputData, outputData = getTrainingData(1000, gui_=False)
+    inputData, outputData = getTrainingData(1, gui_=True)
 #     print(len(inputData))
 #     print(len(outputData))
 #     modelTF = create_modelTF()
 #     modelKER = create_modelKERAS()
-    NN_fileName = "snake_nn.tfl"
+#     NN_fileName = "snake_nn.tfl"
 #     trained_model = trainNetworkTF(inputData, outputData, modelTF, NN_fileName)    
 #     trained_model = trainNetworkKERAS(inputData, outputData, modelKER)
 
-    testNetworkTF(filename=NN_fileName)
+#     testNetworkTF(filename=NN_fileName)
 #     testNetworkKERAS()
 
 
