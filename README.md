@@ -1,6 +1,8 @@
 # snake_NN2
 NN that plays the snake v2.
 
+Note that Snake class has a gui parameter, so you can switch the gui off to speed up the learning process.
+
 For a detailed description you can check this youtube video:
 https://youtu.be/8ksytCccvls
 
