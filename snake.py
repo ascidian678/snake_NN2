@@ -13,8 +13,8 @@ class Snake(object):
         self.gui = gui
         self.speed = 0.1
 
-        self.h = 30
-        self.w = 40
+        self.h = 20
+        self.w = 20
         self.box = [[3, 3], [self.h - 3, self.w - 3]]  # define game space with textpad
 
     def snake_init(self, h, w):
@@ -100,7 +100,8 @@ class Snake(object):
                     input_test_vector = np.array(input_test_vector).reshape(-1, 5, 1)  # creating a vector from a list tflearn
                     predicted_direction = self.NN(_model, input_test_vector)
                     predicted_directions.append(predicted_direction)
-                
+
+                input_vect.append(input_test_vector)
                 predicted_direction_index = np.argmax(np.array(predicted_directions))-1
 
                 if predicted_direction_index == -1:
@@ -128,6 +129,7 @@ class Snake(object):
                 # msg = "Game over!"
                 output = -1
                 output_vect.append(output)
+                time.sleep(0.5)
                 if self.gui:
                     self.quit_render(stdscr)
                 break
@@ -138,7 +140,7 @@ class Snake(object):
             if testNN == False:
                 output_vect.append(output)
             
-        return input_vect, output_vect
+        return input_vect, output_vect, score
 
     def print_score(self, stdscr, score):
         #         h, w = stdscr.getmaxyx()
@@ -253,8 +255,7 @@ class Snake(object):
         return left_blocked, front_blocked, right_blocked
 
     def dir_correction(self, direction, directionVect, left_blocked, front_blocked, right_blocked):
-#         left_direction_vector = np.array([directionVect[1]*(-1), directionVect[0]])
-#         right_direction_vector = np.array([directionVect[1], directionVect[0]*(-1)])
+
         if direction == [0, 1, 0]:
             if front_blocked:
                 direction = [0, 0, 1]
@@ -267,13 +268,11 @@ class Snake(object):
                 if front_blocked:
                     direction = [1, 0, 0]
 
-        
         elif direction == [1, 0, 0]: 
             if left_blocked:    
                 direction = [0, 1, 0]     
                 if front_blocked:
                     direction = [0, 0, 1]
-
 
         return direction
 
@@ -292,7 +291,7 @@ class Snake(object):
         stdscr.clear()
         textpad.rectangle(stdscr, self.box[0][0], self.box[0][1], self.box[1][0], self.box[1][1])
         for s in snake_:
-            stdscr.addstr(s[0], s[1], "#")
+            stdscr.addstr(s[0], s[1], "O")
         stdscr.addstr(apple_[0], apple_[1], "*")
         stdscr.refresh()
 

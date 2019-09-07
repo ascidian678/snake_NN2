@@ -4,24 +4,14 @@ from snake import Snake
 import numpy as np
 from tqdm import tqdm
 
-import tflearn
-# import math
 from tflearn import DNN
 from tflearn.layers.core import input_data, fully_connected
 from tflearn.layers.estimator import regression
-
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.models import model_from_json
-
-
 
 def getTrainingData(_gameNumbers, gui_ = False):
     _input_data = []
     _output_data = []
     _gameNumbers = int(_gameNumbers)
-    checklist = [x * 100 for x in range(1, 11, 1)]
-
     for i in tqdm(range(_gameNumbers)):
         s = Snake(gui=gui_)
 
@@ -32,11 +22,12 @@ def getTrainingData(_gameNumbers, gui_ = False):
     return _input_data, _output_data
 
 
-def testNetworkTF(filename, model=None):
+def testNetworkTF(filename, gamesNum, _gui=True, model=None):
     _input_data = []
     _output_data = []
+    _score = []
 
-    s2 = Snake(gui=True)
+    s2 = Snake(gui=_gui)
 
     print("--- loading model ---")
     # _model.load(filename)
@@ -45,34 +36,20 @@ def testNetworkTF(filename, model=None):
     else:
         _model = create_modelTF()
 #         _model.load("D:/Python3/snake_NN/snake_nn.tfl", weights_only=True)
-        _model.load("/home/cada/python3/snake_NN2/snake_nn.tfl", weights_only=True)
+        _model.load("D:\\Python3\\snake_NN2\\"+filename, weights_only=True)
 
-    input_vect, output_vect = s2.play(testNN=True, _model=_model)
+    n = 0
+    while n < gamesNum:
+        input_vect, output_vect, score = s2.play(testNN=True, _model=_model)
+        print(input_vect)
+        print(output_vect)
+        _input_data.extend(input_vect)
+        _output_data.extend(output_vect)
+        _score.append(score)
+        n += 1
 
-    _input_data.append(input_vect)
-    _output_data.append(output_vect)
+    return _input_data, _output_data, _score
 
-    return _input_data, _output_data
-
-
-def testNetworkKERAS(model=None):
-    _input_data = []
-    _output_data = []
-
-    s2 = Snake(gui=True)
-    # if model != None:
-    #     _model = model
-    _model = create_modelKERAS()
-    json_file = open('model.json', 'r')
-    loaded_json_model = json_file.read()
-    model = model_from_json(loaded_json_model)
-    model.load_weights('model.h5')
-    input_vect, output_vect = s2.play(testNN=True, _model=_model)
-
-    _input_data.append(input_vect)
-    _output_data.append(output_vect)
-
-    return _input_data, _output_data
 
 
 def trainNetworkTF(x, y, model, filename):
@@ -82,15 +59,6 @@ def trainNetworkTF(x, y, model, filename):
     model.fit(X, Y, n_epoch=3, shuffle=True, run_id=filename)
     print("--- saving trained model ---")
     model.save(filename)
-    return model
-
-
-def trainNetworkKERAS(x, y, model):
-    model.fit(np.array(x[0]).reshape(-1, 7), np.array(y[0]).reshape(-1, 3), epochs=3, batch_size=256 )
-    model.save_weights('model.h5')
-    model_json = model.to_json()
-    with open('model.json', 'w') as json_file:
-        json_file.write(model_json)
     return model
 
 
@@ -104,28 +72,19 @@ def create_modelTF():
     return model
 
 
-def create_modelKERAS():
-    model = Sequential()
-    model.add(Dense(units=9, input_dim=7))
-    model.add(Dense(units=15, activation='relu'))
-    model.add(Dense(units=3, activation='softmax'))
-
-    model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
-    return model
-
-
 def main():
-#     inputData, outputData = getTrainingData(1000, gui_=False)
+    # inputData, outputData, score = getTrainingData(1000, gui_=False)
 #     print(len(inputData))
 #     print(len(outputData))
 #     modelTF = create_modelTF()
-#     modelKER = create_modelKERAS()
-    NN_fileName = "snake_nn.tfl"
-#     trained_model = trainNetworkTF(inputData, outputData, modelTF, NN_fileName)    
-#     trained_model = trainNetworkKERAS(inputData, outputData, modelKER)
 
-    testNetworkTF(filename=NN_fileName)
-#     testNetworkKERAS()
+    NN_fileName = "snake_nn.tfl"
+
+    # trained_model = trainNetworkTF(inputData, outputData, modelTF, NN_fileName)
+    inputTestData, outputTestData, scoreTest = testNetworkTF(NN_fileName, 50, False)
+    print("max score: ", max(scoreTest))
+    print(len(inputTestData))
+    print(len(outputTestData))
 
 
 if __name__ == "__main__":
