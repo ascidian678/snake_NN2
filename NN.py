@@ -1,4 +1,4 @@
-# from __future__ import absolute_import, division, print_function
+
 
 from snake import Snake
 import numpy as np
