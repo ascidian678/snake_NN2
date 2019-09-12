@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-
-=======
 # -*- coding: utf-8 -*-
 """
 Neural network deals with a snake game 
@@ -11,7 +8,6 @@ Python 3.7.
 
 @author: M.Cadek
 """
->>>>>>> d471dee0021cb404b2452302e1459e0ebe2872ac
 
 from snake import Snake
 import numpy as np
@@ -54,8 +50,8 @@ def testNetworkTF(filename, gamesNum, _gui=True, model=None):
     n = 0
     while n < gamesNum:
         input_vect, output_vect, score = s2.play(testNN=True, _model=_model)
-        print(input_vect)
-        print(output_vect)
+        #print(input_vect)
+        #print(output_vect)
         _input_data.extend(input_vect)
         _output_data.extend(output_vect)
         _score.append(score)
@@ -86,7 +82,7 @@ def create_modelTF():
 
 
 def main():
-<<<<<<< HEAD
+
     # inputData, outputData, score = getTrainingData(1000, gui_=False)
 #     print(len(inputData))
 #     print(len(outputData))
@@ -95,22 +91,11 @@ def main():
     NN_fileName = "snake_nn.tfl"
 
     # trained_model = trainNetworkTF(inputData, outputData, modelTF, NN_fileName)
-    inputTestData, outputTestData, scoreTest = testNetworkTF(NN_fileName, 50, False)
+    inputTestData, outputTestData, scoreTest = testNetworkTF(NN_fileName, 1, True)
     print("max score: ", max(scoreTest))
     print(len(inputTestData))
     print(len(outputTestData))
-=======
-    inputData, outputData, score = getTrainingData(1000, gui_=False)
-    modelTF = create_modelTF()
 
-    NN_fileName = "snake_nn.tfl"
-
-    trained_model = trainNetworkTF(inputData, outputData, modelTF, NN_fileName)
-    #inputTestData, outputTestData, scoreTest = testNetworkTF(NN_fileName, 50, False)
-    #print("max score: ", max(scoreTest))
-    #print(len(inputTestData))
-    #print(len(outputTestData))
->>>>>>> d471dee0021cb404b2452302e1459e0ebe2872ac
 
 
 if __name__ == "__main__":
