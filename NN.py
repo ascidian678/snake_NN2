@@ -1,4 +1,17 @@
+<<<<<<< HEAD
 
+=======
+# -*- coding: utf-8 -*-
+"""
+Neural network deals with a snake game 
+
+Created on June 19 13:44:13 2019
+
+Python 3.7. 
+
+@author: M.Cadek
+"""
+>>>>>>> d471dee0021cb404b2452302e1459e0ebe2872ac
 
 from snake import Snake
 import numpy as np
@@ -73,6 +86,7 @@ def create_modelTF():
 
 
 def main():
+<<<<<<< HEAD
     # inputData, outputData, score = getTrainingData(1000, gui_=False)
 #     print(len(inputData))
 #     print(len(outputData))
@@ -85,6 +99,18 @@ def main():
     print("max score: ", max(scoreTest))
     print(len(inputTestData))
     print(len(outputTestData))
+=======
+    inputData, outputData, score = getTrainingData(1000, gui_=False)
+    modelTF = create_modelTF()
+
+    NN_fileName = "snake_nn.tfl"
+
+    trained_model = trainNetworkTF(inputData, outputData, modelTF, NN_fileName)
+    #inputTestData, outputTestData, scoreTest = testNetworkTF(NN_fileName, 50, False)
+    #print("max score: ", max(scoreTest))
+    #print(len(inputTestData))
+    #print(len(outputTestData))
+>>>>>>> d471dee0021cb404b2452302e1459e0ebe2872ac
 
 
 if __name__ == "__main__":
