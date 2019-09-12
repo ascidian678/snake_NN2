@@ -24,7 +24,7 @@ def getTrainingData(_gameNumbers, gui_ = False):
     for i in tqdm(range(_gameNumbers)):
         s = Snake(gui=gui_)
 
-        input_vect, output_vect = s.play()
+        input_vect, output_vect, score = s.play()
         _input_data.append(input_vect)
         _output_data.append(output_vect)
 
@@ -63,7 +63,7 @@ def testNetworkTF(filename, gamesNum, _gui=True, model=None):
 
 def trainNetworkTF(x, y, model, filename):
     
-    X = np.array([i[0] for i in x]).reshape(-1, 5, 1)
+    X = np.array([i[0] for i in x]).reshape(-1, 4, 1)
     Y = np.array([i[0] for i in y]).reshape(-1, 1)
     model.fit(X, Y, n_epoch=3, shuffle=True, run_id=filename)
     print("--- saving trained model ---")
@@ -72,7 +72,7 @@ def trainNetworkTF(x, y, model, filename):
 
 
 def create_modelTF():
-    network = input_data(shape=[None, 5, 1], name='input')
+    network = input_data(shape=[None, 4, 1], name='input')
     network = fully_connected(network, 25, activation='relu')
     network = fully_connected(network, 1, activation='linear')
     network = regression(network, optimizer='adam', learning_rate=1e-2, loss='mean_square', name='target')
@@ -83,7 +83,7 @@ def create_modelTF():
 
 def main():
 
-    # inputData, outputData, score = getTrainingData(1000, gui_=False)
+    # inputData, outputData= getTrainingData(50000, gui_=False)
 #     print(len(inputData))
 #     print(len(outputData))
 #     modelTF = create_modelTF()
@@ -93,8 +93,8 @@ def main():
     # trained_model = trainNetworkTF(inputData, outputData, modelTF, NN_fileName)
     inputTestData, outputTestData, scoreTest = testNetworkTF(NN_fileName, 1, True)
     print("max score: ", max(scoreTest))
-    print(len(inputTestData))
-    print(len(outputTestData))
+    # print(len(inputTestData))
+    # print(len(outputTestData))
 
 
 

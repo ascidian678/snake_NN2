@@ -65,19 +65,20 @@ class Snake(object):
             if testNN == False:
              
                 direction = self.dir_correction(direction, new_direction, left_blocked, front_blocked, right_blocked)  
-                dirScalar = 0          
+                output = 0
                 if direction == [1, 0, 0]:
                     new_direction = left_direction_vector
-                    dirScalar = -1
+                    output = -1
                 elif direction == [0, 0, 1]:
                     new_direction = right_direction_vector
-                    dirScalar = 1
+                    output = 1
              
                 if left_blocked and front_blocked and right_blocked:
                  break
                 
-                input_test_vector = [left_blocked, front_blocked, right_blocked, angle, dirScalar]
+                input_test_vector = [left_blocked, front_blocked, right_blocked, angle]
                 input_vect.append(input_test_vector)
+                output_vect.append(output)
                 
                 if score > prev_score or dist < prev_dist:
                     output = 1
@@ -93,21 +94,27 @@ class Snake(object):
                     new_direction = right_direction_vector
                 
                 predicted_directions = []
-                for dirScalar in range(-1, 2):
-                    input_test_vector = [left_blocked, front_blocked, right_blocked, angle, dirScalar]
+                # for dirScalar in range(-1, 2):
+                input_test_vector = [left_blocked, front_blocked, right_blocked, angle]
 
 #                 input_test_vector = np.array(input_test_vector).reshape(-1, 7)  # creating a vector from a list KERAS
-                    input_test_vector = np.array(input_test_vector).reshape(-1, 5, 1)  # creating a vector from a list tflearn
-                    predicted_direction = self.NN(_model, input_test_vector)
-                    predicted_directions.append(predicted_direction)
+                input_test_vector = np.array(input_test_vector).reshape(-1, 4, 1)  # creating a vector from a list tflearn
+                predicted_direction_raw = self.NN(_model, input_test_vector)
+                # predicted_directions.append(predicted_direction)
+                # print(predicted_direction_raw[0][0])
 
                 input_vect.append(input_test_vector)
-                predicted_direction_index = np.argmax(np.array(predicted_directions))-1
-
-                if predicted_direction_index == -1:
+                # print(predicted_direction)
+                # print(np.argmax(np.array(predicted_directions)))
+                # predicted_direction_index = np.argmax(np.array(predicted_directions))-1
+                predicted_direction = round(predicted_direction_raw[0][0])
+                if predicted_direction == -1.0:
                     new_direction = left_direction_vector
-                if predicted_direction_index == 1:
+                elif predicted_direction == 1.0:
                     new_direction = right_direction_vector
+                else:
+                    pass
+                    # print(predicted_direction)
 
             # --------------------------------------------------------------------------------------------
             new_head = self.generate_movement(new_direction, head)
@@ -127,8 +134,8 @@ class Snake(object):
                     snake[0][1] in [box[0][1], box[1][1]] or
                     snake[0] in snake[1:]):
                 # msg = "Game over!"
-                output = -1
-                output_vect.append(output)
+                # output = -1
+                # output_vect.append(output)
                 time.sleep(0.5)
                 if self.gui:
                     self.quit_render(stdscr)
@@ -137,8 +144,8 @@ class Snake(object):
 
             prev_score = score
             prev_dist = dist
-            if testNN == False:
-                output_vect.append(output)
+            # if testNN == False:
+            #     output_vect.append(output)
             
         return input_vect, output_vect, score
 
